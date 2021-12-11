@@ -16,6 +16,7 @@ class App extends Component {
     loading: false,
     alert: null,
     user:{},
+    repos:[]
   };
   static propTypes = {
     searchUsers: PropTypes.func,
@@ -39,8 +40,18 @@ class App extends Component {
     const res = await axios.get(
       `https://api.github.com/users/${username}?client_id=${process.env.REACT_APP_GITHUB_CLIENT_ID}&client_secret=${process.env.REACT_APP_GITHUB_CLIENT_SECRET}`
     );
-    console.log(res)
+   
     this.setState({ user: res.data, loading: false });
+  }
+
+  getUserRepos = async (username) =>{
+    
+    this.setState({ loading: true });
+    const res = await axios.get(
+      `https://api.github.com/users/${username}/repos?per_page=5&sort=created:asc&client_id=${process.env.REACT_APP_GITHUB_CLIENT_ID}&client_secret=${process.env.REACT_APP_GITHUB_CLIENT_SECRET}`
+    );
+    
+    this.setState({ repos: res.data, loading: false });
   }
 
   setAlert = (msg, type) => {
@@ -52,7 +63,7 @@ class App extends Component {
   };
 
   render() {
-    const { users, loading, alert ,user} = this.state;
+    const { users, loading, alert ,user,repos} = this.state;
     return (
       <Router>
         <Fragment>
@@ -78,7 +89,7 @@ class App extends Component {
               component={About}/>
               <Route exact path ='/user/:login'
               render={props=>(
-                <User {...props} getUser={this.getUser} user={user}
+                <User {...props} repos ={repos} getUserRepos ={this.getUserRepos} getUser={this.getUser} user={user}
                 loading ={loading}/>
               )}/>
               
